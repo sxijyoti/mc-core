@@ -7,12 +7,16 @@ endif()
 # External dependencies
 #
 
-# TODO: Implement the find script (and probably the install script too)
-# for LuaJIT2, meanwhile we will be using the find script for Lua of Kitware
+# LuaJIT is required 
+find_package(LuaJIT REQUIRED)
 
-# find_package(LuaJIT2 REQUIRED)
-
-find_package(Lua REQUIRED)
+# LuaJIT not found, fallback to standard Lua
+if(NOT LUAJIT_FOUND)
+	message(STATUS "LuaJIT not found, attempting to use standard Lua as fallback")
+	find_package(Lua REQUIRED)
+	set(LUAJIT_INCLUDE_DIR ${LUA_INCLUDE_DIR})
+	set(LUAJIT_LIBRARIES ${LUA_LIBRARIES})
+endif()
 
 #
 # Plugin name and options
@@ -110,7 +114,7 @@ target_include_directories(${target}
 	${CMAKE_CURRENT_BINARY_DIR}/include
 
 	$<TARGET_PROPERTY:${META_PROJECT_NAME}::metacall,INCLUDE_DIRECTORIES> # MetaCall includes
-	${LUA_INCLUDE_DIR} # Lua includes (lua.h)
+	${LUAJIT_INCLUDE_DIR} 
 
 	PUBLIC
 	${DEFAULT_INCLUDE_DIRECTORIES}
@@ -130,8 +134,8 @@ target_link_libraries(${target}
 	# On macOS, we use dynamic lookup to avoid loading libmetacall twice
 	$<$<NOT:$<PLATFORM_ID:Darwin>>:${META_PROJECT_NAME}::metacall>
 
-	# Lua libraries (both lua and lualib)
-	${LUA_LIBRARIES}
+	# LuaJIT libraries
+	${LUAJIT_LIBRARIES}
 
 	PUBLIC
 	${DEFAULT_LIBRARIES}

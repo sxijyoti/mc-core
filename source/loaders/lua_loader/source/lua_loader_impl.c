@@ -38,6 +38,8 @@
 	standardized and may exist in locations other than lua/
 */
 #include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
 
 typedef struct loader_impl_lua_type
 {
@@ -397,7 +399,7 @@ loader_handle lua_loader_impl_load_from_memory(loader_impl impl, const loader_na
 	{
 		if (luaL_loadbuffer(lua_impl->vm, buffer, size, name) != 0)
 		{
-			log_write("metacall", LOG_LEVEL_Error, "Lua module %s failed to load: %s", name, lua_tostring(lua_impl->vm, -1));
+			log_write("metacall", LOG_LEVEL_ERROR, "Lua module %s failed to load %s", name, lua_tostring(lua_impl->vm, -1));
 			free(handle);
 			return NULL;
 		}
